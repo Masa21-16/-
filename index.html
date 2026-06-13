@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>発注フォーム</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:#f0f4f8;color:#1e293b;font-size:13px;min-height:100vh}
+
+/* ヘッダー */
+.header{background:#1a3a5c;color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header h1{font-size:16px;font-weight:700;letter-spacing:.5px}
+.header-right{display:flex;align-items:center;gap:10px}
+
+/* ログインエリア */
+.login-card{background:#fff;border-radius:12px;padding:24px;max-width:480px;margin:40px auto;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.login-card h2{font-size:15px;font-weight:700;color:#1a3a5c;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #e2e8f0}
+.form-row{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.form-row label{font-size:11px;font-weight:600;color:#64748b}
+.form-row input{padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;font-family:inherit;transition:border-color .2s}
+.form-row input:focus{outline:none;border-color:#1a3a5c;box-shadow:0 0 0 3px rgba(26,58,92,.1)}
+
+/* メインエリア */
+.main{max-width:860px;margin:24px auto;padding:0 16px}
+
+/* カード */
+.card{background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.card-title{font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid #e8f0fb;display:flex;align-items:center;gap:6px}
+.card-title span{background:#1a3a5c;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px}
+
+/* 受注NO検索 */
+.search-row{display:flex;gap:10px;align-items:center}
+.search-row input{flex:1;padding:9px 14px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:14px;font-family:inherit}
+.search-row input:focus{outline:none;border-color:#1a3a5c;box-shadow:0 0 0 3px rgba(26,58,92,.1)}
+
+/* 情報グリッド */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.info-item{display:flex;flex-direction:column;gap:3px}
+.info-item.full{grid-column:1/-1}
+.info-item label{font-size:11px;font-weight:600;color:#64748b}
+.info-val{padding:7px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;min-height:34px;color:#334155}
+
+/* 入力フォーム */
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.input-item{display:flex;flex-direction:column;gap:4px}
+.input-item.full{grid-column:1/-1}
+.input-item label{font-size:11px;font-weight:600;color:#64748b}
+.input-item input,
+.input-item select{padding:8px 12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;transition:border-color .2s}
+.input-item input:focus,
+.input-item select:focus{outline:none;border-color:#1a3a5c;box-shadow:0 0 0 3px rgba(26,58,92,.1)}
+.input-item input:disabled{background:#f1f5f9;color:#94a3b8}
+
+/* ボタン */
+.btn{padding:9px 20px;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:#1a3a5c;color:#fff}
+.btn-primary:hover{background:#15304d}
+.btn-primary:disabled{background:#94a3b8;cursor:not-allowed}
+.btn-success{background:#16a34a;color:#fff}
+.btn-success:hover{background:#15803d}
+.btn-success:disabled{background:#94a3b8;cursor:not-allowed}
+.btn-outline{background:#fff;color:#1a3a5c;border:1.5px solid #1a3a5c}
+.btn-outline:hover{background:#f0f4f8}
+.btn-danger{background:#dc2626;color:#fff}
+.btn-danger:hover{background:#b91c1c}
+.btn-sm{padding:6px 14px;font-size:12px}
+
+/* ステータスバー */
+.status-bar{padding:10px 16px;border-radius:8px;font-size:12px;font-weight:500;margin-bottom:14px;display:none}
+.status-bar.show{display:block}
+.status-loading{background:#dbeafe;color:#1e40af}
+.status-success{background:#dcfce7;color:#166534}
+.status-error{background:#fee2e2;color:#991b1b}
+.status-idle{background:#f1f5f9;color:#475569}
+
+/* アクションエリア */
+.action-row{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px}
+
+/* ログアウトボタン */
+.btn-logout{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer}
+.btn-logout:hover{background:rgba(255,255,255,.25)}
+
+/* レスポンシブ */
+@media(max-width:600px){
+  .info-grid,.input-grid{grid-template-columns:1fr}
+  .info-item.full,.input-item.full{grid-column:1}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📋 発注フォーム</h1>
+  <div class="header-right" id="headerRight"></div>
+</div>
+
+<!-- ログイン画面 -->
+<div id="loginArea">
+  <div class="login-card">
+    <h2>🔐 FileMaker ログイン</h2>
+    <div class="form-row">
+      <label>アカウント名</label>
+      <input type="text" id="fmUser" placeholder="アカウント名を入力">
+    </div>
+    <div class="form-row">
+      <label>パスワード</label>
+      <input type="password" id="fmPass" placeholder="パスワードを入力">
+    </div>
+    <div id="loginStatus" class="status-bar"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">ログイン</button>
+  </div>
+</div>
+
+<!-- メイン画面 -->
+<div id="mainArea" style="display:none">
+  <div class="main">
+
+    <div id="mainStatus" class="status-bar"></div>
+
+    <!-- STEP1: 受注NO検索 -->
+    <div class="card">
+      <div class="card-title"><span>1</span> 受注NOを入力して情報を取得</div>
+      <div class="search-row">
+        <input type="text" id="juChuNo" placeholder="受注NOを入力（例：26023608）">
+        <button class="btn btn-primary" onclick="fetchOrder()">情報を取得</button>
+      </div>
+    </div>
+
+    <!-- STEP2: 取得情報の表示 -->
+    <div class="card" id="infoCard" style="display:none">
+      <div class="card-title"><span>2</span> 取得した受注情報</div>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>受注NO</label>
+          <div class="info-val" id="v受注NO">—</div>
+        </div>
+        <div class="info-item">
+          <label>受注日</label>
+          <div class="info-val" id="v受注日">—</div>
+        </div>
+        <div class="info-item full">
+          <label>顧客名</label>
+          <div class="info-val" id="v顧客名">—</div>
+        </div>
+        <div class="info-item full">
+          <label>ライセンス名</label>
+          <div class="info-val" id="vライセンス名">—</div>
+        </div>
+        <div class="info-item">
+          <label>ライセンス種類</label>
+          <div class="info-val" id="vライセンス種類">—</div>
+        </div>
+        <div class="info-item">
+          <label>ライセンス単価</label>
+          <div class="info-val" id="vライセンス単価">—</div>
+        </div>
+        <div class="info-item">
+          <label>ライセンス数量</label>
+          <div class="info-val" id="vライセンス数量">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP3: 発注処理入力 -->
+    <div class="card" id="inputCard" style="display:none">
+      <div class="card-title"><span>3</span> 発注処理を入力</div>
+      <div class="input-grid">
+        <div class="input-item">
+          <label>状態</label>
+          <select id="i状態">
+            <option value="">選択してください</option>
+            <option value="発注中">発注中</option>
+            <option value="納品済み">納品済み</option>
+            <option value="設定済み">設定済み</option>
+          </select>
+        </div>
+        <div class="input-item">
+          <label>発注担当者</label>
+          <input type="text" id="i発注担当者" placeholder="担当者名を入力">
+        </div>
+        <div class="input-item">
+          <label>発注処理日</label>
+          <input type="date" id="i発注処理日">
+        </div>
+        <div class="input-item">
+          <label>納品日</label>
+          <input type="date" id="i納品日">
+        </div>
+      </div>
+      <div class="action-row">
+        <button class="btn btn-outline" onclick="clearForm()">クリア</button>
+        <button class="btn btn-success" onclick="submitOrder()">✅ FileMakerに書き戻す</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const FM_HOST   = 'https://kaihatu25.nats.tokyo';
+const FM_DB     = 'NATS%E8%B2%A9%E5%A3%B2%E3%83%BB%E5%88%B6%E4%BD%9C%E7%AE%A1%E7%90%86';
+const FM_LAYOUT = 'api顧客管理';
+const FM_API    = `${FM_HOST}/fmi/data/v1/databases/${FM_DB}`;
+
+let fmToken   = null;
+let currentRecordId = null;
+
+/* ---- ステータス表示 ---- */
+function setStatus(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'status-bar show status-' + type;
+  el.textContent = msg;
+}
+function clearStatus(id) {
+  const el = document.getElementById(id);
+  el.className = 'status-bar';
+}
+
+/* ---- ログイン ---- */
+async function doLogin() {
+  const user = document.getElementById('fmUser').value.trim();
+  const pass = document.getElementById('fmPass').value.trim();
+  if (!user || !pass) { setStatus('loginStatus','error','アカウント名とパスワードを入力してください'); return; }
+  setStatus('loginStatus','loading','接続中...');
+  try {
+    const res = await fetch(`${FM_API}/sessions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + btoa(unescape(encodeURIComponent(user + ':' + pass))),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({})
+    });
+    const data = await res.json();
+    if (data.messages[0].code !== '0') { setStatus('loginStatus','error','ログイン失敗：' + data.messages[0].message); return; }
+    fmToken = data.response.token;
+    document.getElementById('loginArea').style.display = 'none';
+    document.getElementById('mainArea').style.display  = 'block';
+    document.getElementById('headerRight').innerHTML =
+      `<span style="font-size:12px;opacity:.8">${user}</span>
+       <button class="btn-logout" onclick="doLogout()">ログアウト</button>`;
+  } catch(e) { setStatus('loginStatus','error','接続エラー：' + e.message); }
+}
+
+/* ---- ログアウト ---- */
+async function doLogout() {
+  if (fmToken) {
+    try { await fetch(`${FM_API}/sessions/${fmToken}`, { method:'DELETE', headers:{'Content-Type':'application/json'} }); } catch(e){}
+    fmToken = null;
+  }
+  document.getElementById('mainArea').style.display  = 'none';
+  document.getElementById('loginArea').style.display = 'block';
+  document.getElementById('fmPass').value = '';
+  document.getElementById('headerRight').innerHTML = '';
+  clearStatus('loginStatus');
+}
+
+/* ---- 受注情報取得 ---- */
+async function fetchOrder() {
+  const no = document.getElementById('juChuNo').value.trim();
+  if (!no) { setStatus('mainStatus','error','受注NOを入力してください'); return; }
+  setStatus('mainStatus','loading','FileMakerから情報を取得中...');
+  document.getElementById('infoCard').style.display  = 'none';
+  document.getElementById('inputCard').style.display = 'none';
+  currentRecordId = null;
+  try {
+    const res = await fetch(`${FM_API}/layouts/${encodeURIComponent(FM_LAYOUT)}/_find`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${fmToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: [{ '受注NO': no }], limit: 1 })
+    });
+    const data = await res.json();
+    if (data.messages[0].code === '401') { setStatus('mainStatus','error','レコードが見つかりませんでした'); return; }
+    if (data.messages[0].code !== '0')  { setStatus('mainStatus','error','エラー：' + data.messages[0].message); return; }
+
+    const rec = data.response.data[0];
+    const fd  = rec.fieldData;
+    currentRecordId = rec.recordId;
+
+    // 表示
+    document.getElementById('v受注NO').textContent      = fd['受注NO']       || '—';
+    document.getElementById('v受注日').textContent      = fd['受注日']       || '—';
+    document.getElementById('v顧客名').textContent      = fd['顧客名']       || '—';
+    document.getElementById('vライセンス名').textContent   = fd['ライセンス名']  || '—';
+    document.getElementById('vライセンス種類').textContent  = fd['ライセンス種類'] || '—';
+    document.getElementById('vライセンス単価').textContent  = fd['ライセンス単価'] ? Number(fd['ライセンス単価']).toLocaleString() + ' 円' : '—';
+    document.getElementById('vライセンス数量').textContent  = fd['ライセンス数量'] || '—';
+
+    // 既存の発注情報があれば入力欄にセット
+    if (fd['状態'])      document.getElementById('i状態').value      = fd['状態'];
+    if (fd['発注担当者']) document.getElementById('i発注担当者').value = fd['発注担当者'];
+    if (fd['発注処理日']) document.getElementById('i発注処理日').value = toDateInput(fd['発注処理日']);
+    if (fd['納品日'])     document.getElementById('i納品日').value    = toDateInput(fd['納品日']);
+
+    document.getElementById('infoCard').style.display  = 'block';
+    document.getElementById('inputCard').style.display = 'block';
+    setStatus('mainStatus','success','受注情報を取得しました（レコードID：' + currentRecordId + '）');
+  } catch(e) { setStatus('mainStatus','error','通信エラー：' + e.message); }
+}
+
+/* ---- 日付変換（FM形式 → input[date]形式） ---- */
+function toDateInput(val) {
+  if (!val) return '';
+  // YYYY/MM/DD → YYYY-MM-DD
+  if (/^\d{4}\/\d{2}\/\d{2}$/.test(val)) return val.replace(/\//g, '-');
+  // MM/DD/YYYY → YYYY-MM-DD
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(val)) {
+    const [m,d,y] = val.split('/');
+    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+  }
+  return val;
+}
+
+/* ---- 日付変換（input → FM形式） ---- */
+function toFmDate(val) {
+  if (!val) return '';
+  // YYYY-MM-DD → MM/DD/YYYY（FileMaker標準）
+  const [y,m,d] = val.split('-');
+  return `${m}/${d}/${y}`;
+}
+
+/* ---- FileMakerに書き戻す ---- */
+async function submitOrder() {
+  if (!currentRecordId) { setStatus('mainStatus','error','先に受注情報を取得してください'); return; }
+  const state  = document.getElementById('i状態').value.trim();
+  const person = document.getElementById('i発注担当者').value.trim();
+  const pDate  = document.getElementById('i発注処理日').value;
+  const dDate  = document.getElementById('i納品日').value;
+  if (!state || !person) { setStatus('mainStatus','error','状態と発注担当者は必須です'); return; }
+
+  setStatus('mainStatus','loading','FileMakerに書き込み中...');
+  try {
+    const fieldData = {
+      '状態':      state,
+      '発注担当者': person,
+      '発注処理日': toFmDate(pDate),
+      '納品日':    toFmDate(dDate)
+    };
+    const res = await fetch(
+      `${FM_API}/layouts/${encodeURIComponent(FM_LAYOUT)}/records/${currentRecordId}`,
+      {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${fmToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fieldData })
+      }
+    );
+    const data = await res.json();
+    if (data.messages[0].code !== '0') { setStatus('mainStatus','error','書き込みエラー：' + data.messages[0].message); return; }
+    setStatus('mainStatus','success','✅ FileMakerへの書き戻しが完了しました！');
+  } catch(e) { setStatus('mainStatus','error','通信エラー：' + e.message); }
+}
+
+/* ---- フォームクリア ---- */
+function clearForm() {
+  document.getElementById('i状態').value      = '';
+  document.getElementById('i発注担当者').value = '';
+  document.getElementById('i発注処理日').value = '';
+  document.getElementById('i納品日').value    = '';
+}
+
+/* Enterキーで検索 */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('juChuNo').addEventListener('keydown', e => {
+    if (e.key === 'Enter') fetchOrder();
+  });
+  document.getElementById('fmPass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+});
+</script>
+</body>
+</html>
